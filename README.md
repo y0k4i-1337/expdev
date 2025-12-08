@@ -1,5 +1,5 @@
-# windbg-assets
-Custom assets for debugging Windows applications
+# expdev
+Assets and scripts to develop x86 exploits.
 
 ## WinDbg
 
@@ -16,3 +16,4 @@ Preview:
 ### Extensions
 
   - [narly](https://code.google.com/archive/p/narly/)
+  - [pykd](https://pypi.org/project/pykd/)

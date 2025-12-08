@@ -11,6 +11,7 @@ Mostly copied from:
 
 - [Standalone Scripts](#standalone-scripts)
     - [egghunter.py](#egghunterpy)
+    - [egghunter_dep.py](#egghunter_deppy)
     - [shellcoder.py](#shellcoderpy)
     - [attach-process.ps1](#attach-processps1)
     - [find-bad-chars-sc.py](#find-bad-chars-scpy)
@@ -30,7 +31,7 @@ pip3 install keystone-engine numpy
 
 ### egghunter.py
 
-requires [keystone-engine](https://github.com/keystone-engine/keystone)
+Requires [keystone-engine](https://github.com/keystone-engine/keystone)
 
 ```
 usage: egghunter.py [-h] [-t TAG] [-b BAD_CHARS [BAD_CHARS ...]] [-s]
@@ -46,7 +47,7 @@ optional arguments:
 
 ```                        
 
-generate default egghunter
+Generate default egghunter
 ```
 ./egghunter.py 
 [+] egghunter created!
@@ -82,9 +83,36 @@ egghunter = b"\xeb\x2a\x59\xb8\x63\x30\x64\x33\x51\x6a\xff\x31\xdb\x64\x89\x23\x
 
 ```
 
+### egghunter_dep.py
+
+Requires [keystone-engine](ttps://github.com/keystone-engine/keystone)
+
+Generates egghunter that can be chained with DEP bypass methods.
+
+```
+usage: egghunter_dep.py [-h] [-e EGG] [-b BAD_CHARS [BAD_CHARS ...]] [-v VAR_NAME] [--depmethod {virtualprotect,virtualalloc}]
+                        [--depreg DEPREG] [--depsize DEPSIZE] [--no-color]
+
+SEH egghunter generator with DEP support (your style)
+
+options:
+  -h, --help            show this help message and exit
+  -e, --egg EGG         4-byte egg tag (default: w00t)
+  -b, --bad-chars BAD_CHARS [BAD_CHARS ...]
+                        Bad chars (space-separated hex, e.g., "00 0a")
+  -v, --var-name VAR_NAME
+                        Variable name for output (default: egghunter)
+  --depmethod {virtualprotect,virtualalloc}
+                        Enable DEP bypass after egg found
+  --depreg DEPREG       Register holding API address (default: esi)
+  --depsize DEPSIZE     Size for DEP call (default: 0x1000)
+  --no-color            Disable ANSI colors
+```
+
+
 ### shellcoder.py
 
-requires [keystone-engine](https://github.com/keystone-engine/keystone)
+Requires [keystone-engine](https://github.com/keystone-engine/keystone)
 
 Creates reverse shell with optional msi loader
 
