@@ -48,6 +48,8 @@ def parse_iat(iat_raw, base_addr):
             continue
         iat_addr = int(values[0], 16)
         resolved_addr = int(values[1], 16)
+        if "!" not in values[2]:
+            continue
         dll_name, func_name = values[2].split("!", 1)
         if dll_name not in iat:
             iat[dll_name] = []
