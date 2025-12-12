@@ -108,6 +108,10 @@ class GadgetEngine:
         self.gadgets = results
 
 
+def parsehex(value):
+    return int(value, 16)
+
+
 def csvs_to_int_list(csvs):
     return [int(x, 16) for x in csvs.split(",")]
 
@@ -204,6 +208,7 @@ def main():
         default=[],
         type=csvs_to_int_list,
     )
+    parser.add_argument("--base", help="show addresses as base + offset", type=parsehex)
 
     # process args
     args = parser.parse_args()
@@ -222,7 +227,11 @@ def main():
 
     # print results
     for gadget in engine.gadgets:
-        print("{}:  {}".format(gadget.addrs[0], gadget.text))
+        if args.base:
+            offset = int(gadget.addrs[0], 16) - args.base
+            print("{} + 0x{:x}:  {}".format(hex(args.base), offset, gadget.text))
+        else:
+            print("{}:  {}".format(gadget.addrs[0], gadget.text))
 
 
 if __name__ == "__main__":
