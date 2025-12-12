@@ -112,24 +112,45 @@ def parsehex(value):
     return int(value, 16)
 
 
-def csvs_to_int_list(csvs):
-    return [int(x, 16) for x in csvs.split(",")]
+def csvs_to_int_set(csvs):
+    return {int(x, 16) for x in csvs.split(",")}
 
 
 def check_bad_addr(addr, bad):
-    is_bad = False
-    addr = int(addr, 16)
-    addr_chars = [(addr >> i) & 0xFF for i in range(0, 25, 8)]
-    for char in addr_chars:
-        if char in bad:
-            is_bad = True
-    return is_bad
+    """
+    Return True if any byte of `addr` is in the collection `bad`.
+
+    `addr` may be a hex string (e.g. '0x41424344' or '41424344') or an int.
+    The number of bytes checked is computed from the integer size so that
+    small offsets (for example after subtracting a provided base) only
+    test the low bytes and do not accidentally examine high bytes that
+    are part of an ASLR base.
+    """
+    # normalize addr to integer (accept hex string or int)
+    if isinstance(addr, str):
+        addr_int = int(addr, 16)
+    else:
+        addr_int = int(addr)
+
+    # compute how many bytes are actually needed to represent the value
+    # this avoids checking high-order bytes for small offsets
+    nbytes = max(1, (addr_int.bit_length() + 7) // 8)
+
+    for shift in range(0, nbytes * 8, 8):
+        if ((addr_int >> shift) & 0xFF) in bad:
+            return True
+    return False
 
 
 def make_unique(lines, args):
     results = {}
     for line in lines:
-        if check_bad_addr(line["addr"], args.bad_chars):
+        # if base address is specified, consider bad chars on offset only
+        addr = line["addr"]
+        if args.base:
+            addr = hex(int(addr, 16) - args.base)
+
+        if check_bad_addr(addr, args.bad_chars):
             continue
         if line["text"] in results:
             results[line["text"]].append(line["addr"])
@@ -160,7 +181,8 @@ def load(file, skip):
         for i in range(skip):
             next(f)
         lines = f.readlines()
-    return lines
+    # return only lines that begin with 0x (addresses)
+    return [line for line in lines if line.strip().startswith("0x")]
 
 
 def main():
@@ -172,10 +194,10 @@ def main():
     parser.add_argument("file")
     parser.add_argument(
         "--skip-lines",
-        help="number of lines in file before gadgets",
+        help="number of lines in file before gadgets (optional)",
         type=int,
         default=0,
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "--exact",
@@ -206,7 +228,7 @@ def main():
         "--bad-chars",
         help="known bad characters, format: 00,01,02,03",
         default=[],
-        type=csvs_to_int_list,
+        type=csvs_to_int_set,
     )
     parser.add_argument("--base", help="show addresses as base + offset", type=parsehex)
 
